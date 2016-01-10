@@ -20,7 +20,7 @@ const (
 )
 
 // 随机种子
-var r = mr.New(mr.NewSource(time.Now().Unix()))
+var random = mr.New(mr.NewSource(time.Now().Unix()))
 
 // 随机字符串取值的表
 var table = [][]byte{
@@ -37,12 +37,41 @@ func Bytes(min, max int, cats ...int) []byte {
 		panic(err)
 	}
 
-	return bytes(min+r.Intn(max-min), cats)
+	return bytes(min+random.Intn(max-min), cats)
 }
 
-// 产生一个随机字符串
+// 产生一个随机字符串，其长度为[min, max)。
+// cats 随机字符串的类型，指定非法值是触发panic
 func String(min, max int, cats ...int) string {
 	return string(Bytes(min, max, cats...))
+}
+
+// Rand 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
+type Rand struct {
+	min, max int
+	cats     []int
+}
+
+func NewRand(min, max int, cats []int) (*Rand, error) {
+	if err := checkArgs(min, max, cats); err != nil {
+		return nil, err
+	}
+
+	return &Rand{
+		min:  min,
+		max:  max,
+		cats: cats,
+	}, nil
+}
+
+// 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过NewRand()预先指定。
+func (r *Rand) Bytes() []byte {
+	return bytes(r.min+random.Intn(r.max-r.min), r.cats)
+}
+
+// 产生一个随机字符串，功能与全局函数String()相同，但参数通过NewRand()预先指定。
+func (r *Rand) String() string {
+	return string(r.Bytes())
 }
 
 // 生成指定指定长度的随机字符数组
@@ -52,7 +81,7 @@ func bytes(l int, cats []int) []byte {
 	for {
 		for _, cat := range cats {
 			s := table[cat]
-			index := r.Intn(len(s))
+			index := random.Intn(len(s))
 			bs = append(bs, s[index])
 
 			i++
