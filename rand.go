@@ -6,6 +6,7 @@
 package rand
 
 import (
+	"errors"
 	mr "math/rand"
 	"time"
 )
@@ -32,7 +33,9 @@ var table = [][]byte{
 // 产生随机字符数组，其长度为[min, max)。
 // cats 随机字符串的类型，指定非法值是触发panic
 func Bytes(min, max int, cats ...int) []byte {
-	checkArgs(min, max, cats)
+	if err := checkArgs(min, max, cats); err != nil {
+		panic(err)
+	}
 
 	return bytes(min+r.Intn(max-min), cats)
 }
@@ -61,21 +64,23 @@ func bytes(l int, cats []int) []byte {
 }
 
 // 检测各个参数是否合法
-func checkArgs(min, max int, cats []int) {
+func checkArgs(min, max int, cats []int) error {
 	if min <= 0 {
-		panic("rand.Bytes:min<=0")
+		return errors.New("rand.checkArgs:min值必须大于0")
 	}
 	if max <= min {
-		panic("rand.Bytes:max<=min")
+		return errors.New("rand.checkArgs:max必须大于min")
 	}
 
 	if len(cats) == 0 {
-		panic("rand.Bytes:无效的cat参数")
+		return errors.New("rand.checkArgs:无效的cat参数")
 	}
 
 	for _, cat := range cats {
 		if cat < 0 || cat >= size {
-			panic("rand.Bytes:无效的cat参数")
+			return errors.New("rand.Bytes:无效的cat参数")
 		}
 	}
+
+	return nil
 }
