@@ -29,6 +29,7 @@ func TestCheckArgs(t *testing.T) {
 	a.NotError(checkArgs(5, 6, []int{Lower, Upper}))
 }
 
+// bytes
 func TestBytes1(t *testing.T) {
 	a := assert.New(t)
 
@@ -39,6 +40,7 @@ func TestBytes1(t *testing.T) {
 	a.NotEqual(bytes(10, []int{Lower, Digit}), bytes(10, []int{Lower, Digit}))
 }
 
+// Bytes
 func TestBytes2(t *testing.T) {
 	a := assert.New(t)
 
@@ -58,46 +60,26 @@ func TestString(t *testing.T) {
 	t.Log("String(8,10,Lower, Punct):", String(8, 10, Lower, Punct))
 }
 
-// 固定长度的随机字符串
-// BenchmarkBytes_6_7_Lower-4  	 5000000	       261 ns/op
-func BenchmarkBytes_6_7_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(6, 7, Lower)
-	}
+func TestRandNoBuffer(t *testing.T) {
+	a := assert.New(t)
+
+	r, err := New(0, 5, 7, Lower, Digit)
+	a.NotError(err).NotNil(r)
+	a.Equal(cap(r.channel), 0)
+
+	a.NotEqual(r.Bytes(), r.Bytes())
+	a.NotEqual(r.Bytes(), r.Bytes())
+	a.NotEqual(r.String(), r.String())
 }
 
-// 固定长度的随机字符串
-// BenchmarkBytes_6_7_All-4    	 5000000	       253 ns/op
-func BenchmarkBytes_6_7_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(6, 7, Lower, Upper, Digit, Punct)
-	}
-}
+func TestRandBuffer(t *testing.T) {
+	a := assert.New(t)
 
-// BenchmarkBytes_4_6_Lower-4  	10000000	       223 ns/op
-func BenchmarkBytes_4_6_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(4, 6, Lower)
-	}
-}
+	r, err := New(100, 5, 7, Lower, Digit)
+	a.NotError(err).NotNil(r)
+	a.Equal(cap(r.channel), 100)
 
-// BenchmarkBytes_4_6_All-4    	10000000	       221 ns/op
-func BenchmarkBytes_4_6_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(4, 6, Lower, Upper, Digit, Punct)
-	}
-}
-
-// BenchmarkBytes_10_32_Lower-4	 2000000	       667 ns/op
-func BenchmarkBytes_10_32_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(10, 32, Lower)
-	}
-}
-
-// BenchmarkBytes_10_32_All-4  	 2000000	       664 ns/op
-func BenchmarkBytes_10_32_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(10, 32, Lower, Upper, Digit, Punct)
-	}
+	a.NotEqual(r.String(), r.String())
+	a.NotEqual(r.String(), r.String())
+	a.NotEqual(r.Bytes(), r.Bytes())
 }

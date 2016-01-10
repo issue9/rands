@@ -48,29 +48,51 @@ func String(min, max int, cats ...int) string {
 
 // Rand 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
 type Rand struct {
-	min, max int
-	cats     []int
+	min, max  int
+	cats      []int
+	hasBuffer bool
+	channel   chan []byte
 }
 
-func NewRand(min, max int, cats []int) (*Rand, error) {
+// 声明一个Rand变量。
+// bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
+func New(bufferSize int, min, max int, cats ...int) (*Rand, error) {
 	if err := checkArgs(min, max, cats); err != nil {
 		return nil, err
 	}
 
-	return &Rand{
-		min:  min,
-		max:  max,
-		cats: cats,
-	}, nil
+	ret := &Rand{
+		min:       min,
+		max:       max,
+		cats:      cats,
+		hasBuffer: bufferSize > 0,
+	}
+	if ret.hasBuffer {
+		ret.channel = make(chan []byte, bufferSize)
+		go func() {
+			for {
+				ret.channel <- bytes(min+random.Intn(max-min), cats)
+			}
+		}()
+	}
+	return ret, nil
 }
 
 // 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过NewRand()预先指定。
 func (r *Rand) Bytes() []byte {
+	if r.hasBuffer {
+		return <-r.channel
+	}
+
 	return bytes(r.min+random.Intn(r.max-r.min), r.cats)
 }
 
 // 产生一个随机字符串，功能与全局函数String()相同，但参数通过NewRand()预先指定。
 func (r *Rand) String() string {
+	if r.hasBuffer {
+		return string(<-r.channel)
+	}
+
 	return string(r.Bytes())
 }
 
