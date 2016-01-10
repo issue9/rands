@@ -22,3 +22,12 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# vim
+*.swp
+
+# 测试文件
+test.db
+
+# mac os x
+.DS_Store
