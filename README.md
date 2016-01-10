@@ -5,6 +5,12 @@ rand 为一个随机字符串生成工具。
 ```go
 // 生成一个长度为[8,10)之间的随机字符串，包含小写与数字字符
 str := rand.String(8, 10, Lower, Digit)
+
+
+// 生成一个带缓存功能的随机字符串生成器
+r := rand.New(100, 5, 7, Lower, Digit, Punct)
+str1 := r.String()
+str2 := r.String()
 ```
 
 ### 安装
