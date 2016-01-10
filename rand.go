@@ -38,6 +38,11 @@ var table = [][]byte{
 	Punct: []byte("~!@#$%^&*()_+-={}|[]\\:\";'<>,.?/"),
 }
 
+// 手动指定一个随机种子，默认情况下使用当前包初始时的时间戳作为随机种子。
+func Seed(seed int64) {
+	random = mr.New(mr.NewSource(seed))
+}
+
 // 产生随机字符数组，其长度为[min, max)。
 // cats 随机字符串的类型，指定非法值是触发panic
 func Bytes(min, max int, cats ...int) []byte {
@@ -45,7 +50,7 @@ func Bytes(min, max int, cats ...int) []byte {
 		panic(err)
 	}
 
-	return bytes(min+random.Intn(max-min), cats)
+	return bytes(random, min+random.Intn(max-min), cats)
 }
 
 // 产生一个随机字符串，其长度为[min, max)。
@@ -56,6 +61,7 @@ func String(min, max int, cats ...int) string {
 
 // Rand 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
 type Rand struct {
+	random    *mr.Rand
 	min, max  int
 	cats      []int
 	hasBuffer bool
@@ -64,12 +70,16 @@ type Rand struct {
 
 // 声明一个Rand变量。
 // bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
-func New(bufferSize int, min, max int, cats ...int) (*Rand, error) {
+func New(seed int64, bufferSize, min, max int, cats ...int) (*Rand, error) {
 	if err := checkArgs(min, max, cats); err != nil {
 		return nil, err
 	}
+	if seed == 0 {
+		seed = time.Now().Unix()
+	}
 
 	ret := &Rand{
+		random:    mr.New(mr.NewSource(seed)),
 		min:       min,
 		max:       max,
 		cats:      cats,
@@ -79,7 +89,7 @@ func New(bufferSize int, min, max int, cats ...int) (*Rand, error) {
 		ret.channel = make(chan []byte, bufferSize)
 		go func() {
 			for {
-				ret.channel <- bytes(min+random.Intn(max-min), cats)
+				ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), cats)
 			}
 		}()
 	}
@@ -92,7 +102,7 @@ func (r *Rand) Bytes() []byte {
 		return <-r.channel
 	}
 
-	return bytes(r.min+random.Intn(r.max-r.min), r.cats)
+	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.cats)
 }
 
 // 产生一个随机字符串，功能与全局函数String()相同，但参数通过NewRand()预先指定。
@@ -105,13 +115,13 @@ func (r *Rand) String() string {
 }
 
 // 生成指定指定长度的随机字符数组
-func bytes(l int, cats []int) []byte {
+func bytes(r *mr.Rand, l int, cats []int) []byte {
 	bs := make([]byte, 0, l)
 	i := 0
 	for {
 		for _, cat := range cats {
 			s := table[cat]
-			index := random.Intn(len(s))
+			index := r.Intn(len(s))
 			bs = append(bs, s[index])
 
 			i++

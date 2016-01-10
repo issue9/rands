@@ -33,11 +33,11 @@ func TestCheckArgs(t *testing.T) {
 func TestBytes1(t *testing.T) {
 	a := assert.New(t)
 
-	a.NotEqual(bytes(10, []int{Lower}), bytes(10, []int{Lower}))
-	a.NotEqual(bytes(10, []int{Lower}), bytes(10, []int{Lower}))
-	a.NotEqual(bytes(10, []int{Upper}), bytes(10, []int{Lower}))
+	a.NotEqual(bytes(random, 10, []int{Lower}), bytes(random, 10, []int{Lower}))
+	a.NotEqual(bytes(random, 10, []int{Lower}), bytes(random, 10, []int{Lower}))
+	a.NotEqual(bytes(random, 10, []int{Upper}), bytes(random, 10, []int{Lower}))
 
-	a.NotEqual(bytes(10, []int{Lower, Digit}), bytes(10, []int{Lower, Digit}))
+	a.NotEqual(bytes(random, 10, []int{Lower, Digit}), bytes(random, 10, []int{Lower, Digit}))
 }
 
 // Bytes
@@ -58,12 +58,13 @@ func TestString(t *testing.T) {
 	t.Log("String(8,10,Digit):", String(8, 10, Digit))
 	t.Log("String(8,10,Punct):", String(8, 10, Punct))
 	t.Log("String(8,10,Lower, Punct):", String(8, 10, Lower, Punct))
+	t.Log("String(8,10,Lower, Upper, Digit, Punct):", String(8, 10, Lower, Upper, Digit, Punct))
 }
 
 func TestRandNoBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(0, 5, 7, Lower, Digit)
+	r, err := New(0, 0, 5, 7, Lower, Digit)
 	a.NotError(err).NotNil(r)
 	a.Equal(cap(r.channel), 0)
 
@@ -75,7 +76,7 @@ func TestRandNoBuffer(t *testing.T) {
 func TestRandBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(100, 5, 7, Lower, Digit)
+	r, err := New(10000134, 100, 5, 7, Lower, Digit)
 	a.NotError(err).NotNil(r)
 	a.Equal(cap(r.channel), 100)
 
