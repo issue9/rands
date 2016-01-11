@@ -27,7 +27,7 @@ const (
 	size
 )
 
-// 随机种子
+// 供全局函数使用的随机函数生成。
 var random = mr.New(mr.NewSource(time.Now().Unix()))
 
 // 随机字符串取值的表
@@ -38,7 +38,7 @@ var table = [][]byte{
 	Punct: []byte("~!@#$%^&*()_+-={}|[]\\:\";'<>,.?/"),
 }
 
-// 手动指定一个随机种子，默认情况下使用当前包初始时的时间戳作为随机种子。
+// 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
 func Seed(seed int64) {
 	random = mr.New(mr.NewSource(seed))
 }
@@ -69,6 +69,7 @@ type Rand struct {
 }
 
 // 声明一个Rand变量。
+// seed 随机种子，若为0表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
 func New(seed int64, bufferSize, min, max int, cats ...int) (*Rand, error) {
 	if err := checkArgs(min, max, cats); err != nil {
@@ -128,8 +129,8 @@ func bytes(r *mr.Rand, l int, cats []int) []byte {
 			if i >= l {
 				return bs
 			}
-		}
-	}
+		} // end for cats
+	} // end for true
 }
 
 // 检测各个参数是否合法
