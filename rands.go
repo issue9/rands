@@ -5,17 +5,17 @@
 // 生成各种随机字符串的包
 //
 //  // 生成一个长度介于[6,9)之间由小写字母与数字组成的的随机字符串
-//  str := rand.String(6, 9, Lower, Digit)
+//  str := rands.String(6, 9, Lower, Digit)
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r := rand.New(100, 5, 7, Lower, Digit, Punct)
+//  r := rands.New(100, 5, 7, Lower, Digit, Punct)
 //  str1 := r.String()
 //  str2 := r.String()
-package rand
+package rands
 
 import (
 	"errors"
-	mr "math/rand"
+	"math/rand"
 	"time"
 )
 
@@ -28,7 +28,7 @@ const (
 )
 
 // 供全局函数使用的随机函数生成。
-var random = mr.New(mr.NewSource(time.Now().Unix()))
+var random = rand.New(rand.NewSource(time.Now().Unix()))
 
 // 随机字符串取值的表
 var table = [][]byte{
@@ -40,7 +40,7 @@ var table = [][]byte{
 
 // 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
 func Seed(seed int64) {
-	random = mr.New(mr.NewSource(seed))
+	random = rand.New(rand.NewSource(seed))
 }
 
 // 产生随机字符数组，其长度为[min, max)。
@@ -59,19 +59,19 @@ func String(min, max int, cats ...int) string {
 	return string(Bytes(min, max, cats...))
 }
 
-// Rand 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
-type Rand struct {
-	random    *mr.Rand
+// Rands 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
+type Rands struct {
+	random    *rand.Rand
 	min, max  int
 	cats      []int
 	hasBuffer bool
 	channel   chan []byte
 }
 
-// 声明一个Rand变量。
+// 声明一个Rands变量。
 // seed 随机种子，若为0表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
-func New(seed int64, bufferSize, min, max int, cats ...int) (*Rand, error) {
+func New(seed int64, bufferSize, min, max int, cats ...int) (*Rands, error) {
 	if err := checkArgs(min, max, cats); err != nil {
 		return nil, err
 	}
@@ -79,8 +79,8 @@ func New(seed int64, bufferSize, min, max int, cats ...int) (*Rand, error) {
 		seed = time.Now().Unix()
 	}
 
-	ret := &Rand{
-		random:    mr.New(mr.NewSource(seed)),
+	ret := &Rands{
+		random:    rand.New(rand.NewSource(seed)),
 		min:       min,
 		max:       max,
 		cats:      cats,
@@ -97,8 +97,8 @@ func New(seed int64, bufferSize, min, max int, cats ...int) (*Rand, error) {
 	return ret, nil
 }
 
-// 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过NewRand()预先指定。
-func (r *Rand) Bytes() []byte {
+// 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
+func (r *Rands) Bytes() []byte {
 	if r.hasBuffer {
 		return <-r.channel
 	}
@@ -106,8 +106,8 @@ func (r *Rand) Bytes() []byte {
 	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.cats)
 }
 
-// 产生一个随机字符串，功能与全局函数String()相同，但参数通过NewRand()预先指定。
-func (r *Rand) String() string {
+// 产生一个随机字符串，功能与全局函数String()相同，但参数通过New()预先指定。
+func (r *Rands) String() string {
 	if r.hasBuffer {
 		return string(<-r.channel)
 	}
@@ -116,7 +116,7 @@ func (r *Rand) String() string {
 }
 
 // 生成指定指定长度的随机字符数组
-func bytes(r *mr.Rand, l int, cats []int) []byte {
+func bytes(r *rand.Rand, l int, cats []int) []byte {
 	bs := make([]byte, 0, l)
 	i := 0
 	for {
@@ -136,19 +136,19 @@ func bytes(r *mr.Rand, l int, cats []int) []byte {
 // 检测各个参数是否合法
 func checkArgs(min, max int, cats []int) error {
 	if min <= 0 {
-		return errors.New("rand.checkArgs:min值必须大于0")
+		return errors.New("rands.checkArgs:min值必须大于0")
 	}
 	if max <= min {
-		return errors.New("rand.checkArgs:max必须大于min")
+		return errors.New("rands.checkArgs:max必须大于min")
 	}
 
 	if len(cats) == 0 {
-		return errors.New("rand.checkArgs:无效的cat参数")
+		return errors.New("rands.checkArgs:无效的cat参数")
 	}
 
 	for _, cat := range cats {
 		if cat < 0 || cat >= size {
-			return errors.New("rand.Bytes:无效的cat参数")
+			return errors.New("rands.Bytes:无效的cat参数")
 		}
 	}
 

@@ -1,14 +1,14 @@
-rand [![Build Status](https://travis-ci.org/issue9/rand.svg?branch=master)](https://travis-ci.org/issue9/rand)
+rands [![Build Status](https://travis-ci.org/issue9/rands.svg?branch=master)](https://travis-ci.org/issue9/rands)
 ======
 
-rand 为一个随机字符串生成工具。
+rands 为一个随机字符串生成工具。
 ```go
 // 生成一个长度为[8,10)之间的随机字符串，包含小写与数字字符
-str := rand.String(8, 10, Lower, Digit)
+str := rands.String(8, 10, Lower, Digit)
 
 
 // 生成一个带缓存功能的随机字符串生成器
-r := rand.New(100, 5, 7, Lower, Digit, Punct)
+r := rands.New(100, 5, 7, Lower, Digit, Punct)
 str1 := r.String()
 str2 := r.String()
 ```
@@ -16,14 +16,14 @@ str2 := r.String()
 ### 安装
 
 ```shell
-go get github.com/issue9/rand
+go get github.com/issue9/rands
 ```
 
 
 ### 文档
 
-[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/issue9/rand)
-[![GoDoc](https://godoc.org/github.com/issue9/rand?status.svg)](https://godoc.org/github.com/issue9/rand)
+[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/issue9/rands)
+[![GoDoc](https://godoc.org/github.com/issue9/rands?status.svg)](https://godoc.org/github.com/issue9/rands)
 
 
 ### 版权

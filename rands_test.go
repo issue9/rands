@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-package rand
+package rands
 
 import (
 	"testing"
@@ -61,7 +61,7 @@ func TestString(t *testing.T) {
 	t.Log("String(8,10,Lower, Upper, Digit, Punct):", String(8, 10, Lower, Upper, Digit, Punct))
 }
 
-func TestRandNoBuffer(t *testing.T) {
+func TestRandsNoBuffer(t *testing.T) {
 	a := assert.New(t)
 
 	r, err := New(0, 0, 5, 7, Lower, Digit)
@@ -73,7 +73,7 @@ func TestRandNoBuffer(t *testing.T) {
 	a.NotEqual(r.String(), r.String())
 }
 
-func TestRandBuffer(t *testing.T) {
+func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t)
 
 	r, err := New(10000134, 100, 5, 7, Lower, Digit)
