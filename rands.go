@@ -8,7 +8,7 @@
 //  str := rands.String(6, 9, Lower, Digit)
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r := rands.New(100, 5, 7, Lower, Digit, Punct)
+//  r := rands.New(time.Now().Unix(), 100, 5, 7, Lower, Digit, Punct)
 //  str1 := r.String()
 //  str2 := r.String()
 package rands
