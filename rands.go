@@ -5,10 +5,10 @@
 // 生成各种随机字符串的包
 //
 //  // 生成一个长度介于[6,9)之间由小写字母与数字组成的的随机字符串
-//  str := rands.String(6, 9, Lower, Digit)
+//  str := rands.String(6, 9, rands.Lower, rands.Digit)
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r := rands.New(time.Now().Unix(), 100, 5, 7, Lower, Digit, Punct)
+//  r := rands.New(time.Now().Unix(), 100, 5, 7, rands.Lower, rands.Digit, rands.Punct)
 //  str1 := r.String()
 //  str2 := r.String()
 package rands
