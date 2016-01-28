@@ -28,6 +28,7 @@ const (
 )
 
 // 供全局函数使用的随机函数生成。
+// Bytes和String依赖此项。
 var random = rand.New(rand.NewSource(time.Now().Unix()))
 
 // 随机字符串取值的表
@@ -39,6 +40,7 @@ var table = [][]byte{
 }
 
 // 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
+// Bytes和String依赖此项。但是Rands有专门的随机函数，不受此影响。
 func Seed(seed int64) {
 	random = rand.New(rand.NewSource(seed))
 }
@@ -95,6 +97,11 @@ func New(seed int64, bufferSize, min, max int, cats ...int) (*Rands, error) {
 		}()
 	}
 	return ret, nil
+}
+
+// 重新指定随机种子。
+func (r *Rands) Seed(seed int64) {
+	r.random.Seed(seed)
 }
 
 // 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
