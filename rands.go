@@ -29,7 +29,7 @@ const (
 
 // 供全局函数使用的随机函数生成。
 // Bytes和String依赖此项。
-var random = rand.New(rand.NewSource(time.Now().Unix()))
+var random = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // 随机字符串取值的表
 var table = [][]byte{
@@ -78,7 +78,7 @@ func New(seed int64, bufferSize, min, max int, cats ...int) (*Rands, error) {
 		return nil, err
 	}
 	if seed == 0 {
-		seed = time.Now().Unix()
+		seed = time.Now().UnixNano()
 	}
 
 	ret := &Rands{
