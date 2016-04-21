@@ -14,30 +14,24 @@ func TestCheckArgs(t *testing.T) {
 	a := assert.New(t)
 
 	// min < 0
-	a.Error(checkArgs(-1, 1, []int{Lower}))
+	a.Error(checkArgs(-1, 1, []byte("12")))
 
 	// max <= min
-	a.Error(checkArgs(5, 5, []int{Lower}))
+	a.Error(checkArgs(5, 5, []byte("12")))
 
 	// cats为空
-	a.Error(checkArgs(5, 6, []int{}))
+	a.Error(checkArgs(5, 6, []byte("")))
 
-	// cats的取值非法
-	a.Error(checkArgs(5, 6, []int{100, 101}))
-	a.Error(checkArgs(5, 6, []int{-1, -2}))
-
-	a.NotError(checkArgs(5, 6, []int{Lower, Upper}))
+	a.NotError(checkArgs(5, 6, []byte("123")))
 }
 
 // bytes
 func TestBytes1(t *testing.T) {
 	a := assert.New(t)
 
-	a.NotEqual(bytes(random, 10, []int{Lower}), bytes(random, 10, []int{Lower}))
-	a.NotEqual(bytes(random, 10, []int{Lower}), bytes(random, 10, []int{Lower}))
-	a.NotEqual(bytes(random, 10, []int{Upper}), bytes(random, 10, []int{Lower}))
-
-	a.NotEqual(bytes(random, 10, []int{Lower, Digit}), bytes(random, 10, []int{Lower, Digit}))
+	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
+	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
+	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
 }
 
 // Bytes
@@ -45,26 +39,17 @@ func TestBytes2(t *testing.T) {
 	a := assert.New(t)
 
 	// 测试固定长度
-	a.Equal(len(Bytes(8, 9, Lower)), 8)
+	a.Equal(len(Bytes(8, 9, []byte("1ks;dfp123;4j;ladj;fpoqwe"))), 8)
 
 	// 非固定长度
-	l := len(Bytes(8, 10, Lower))
+	l := len(Bytes(8, 10, []byte("adf;wieqpwekwjerpq")))
 	a.True(l >= 8 && l <= 10)
-}
-
-func TestString(t *testing.T) {
-	t.Log("String(8,10,Lower):", String(8, 10, Lower))
-	t.Log("String(8,10,Upper):", String(8, 10, Upper))
-	t.Log("String(8,10,Digit):", String(8, 10, Digit))
-	t.Log("String(8,10,Punct):", String(8, 10, Punct))
-	t.Log("String(8,10,Lower, Punct):", String(8, 10, Lower, Punct))
-	t.Log("String(8,10,Lower, Upper, Digit, Punct):", String(8, 10, Lower, Upper, Digit, Punct))
 }
 
 func TestRandsNoBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(0, 0, 5, 7, Lower, Digit)
+	r, err := New(0, 0, 5, 7, []byte("ad;fqeqwejqw;ejnweqwer"))
 	a.NotError(err).NotNil(r)
 	a.Equal(cap(r.channel), 0)
 
@@ -76,7 +61,7 @@ func TestRandsNoBuffer(t *testing.T) {
 func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(10000134, 100, 5, 7, Lower, Digit)
+	r, err := New(10000134, 100, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	a.NotError(err).NotNil(r)
 	a.Equal(cap(r.channel), 100)
 

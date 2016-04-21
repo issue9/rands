@@ -4,11 +4,11 @@
 
 // 生成各种随机字符串的包
 //
-//  // 生成一个长度介于[6,9)之间由小写字母与数字组成的的随机字符串
-//  str := rands.String(6, 9, rands.Lower, rands.Digit)
+//  // 生成一个长度介于[6,9)之间的随机字符串
+//  str := rands.String(6, 9, "1343567")
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r := rands.New(time.Now().Unix(), 100, 5, 7, rands.Lower, rands.Digit, rands.Punct)
+//  r := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
 //  str1 := r.String()
 //  str2 := r.String()
 package rands
@@ -19,25 +19,9 @@ import (
 	"time"
 )
 
-const (
-	Upper = iota // 大写字母
-	Lower        // 小写字母
-	Digit        // 数字
-	Punct        // 标点符号
-	size
-)
-
 // 供全局函数使用的随机函数生成。
 // Bytes和String依赖此项。
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-// 随机字符串取值的表
-var table = [][]byte{
-	Upper: []byte("ABCDEFGHIJKLMNPQRSTUVWXYZ"),
-	Lower: []byte("abcdefghijkmnpqrstuvwxyz"),
-	Digit: []byte("0123456789"),
-	Punct: []byte("~!@#$%^&*()_+-={}|[]\\:\";'<>,.?/"),
-}
 
 // 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
 // Bytes和String依赖此项。但是Rands有专门的随机函数，不受此影响。
@@ -46,26 +30,26 @@ func Seed(seed int64) {
 }
 
 // 产生随机字符数组，其长度为[min, max)。
-// cats 随机字符串的类型，指定非法值是触发panic
-func Bytes(min, max int, cats ...int) []byte {
-	if err := checkArgs(min, max, cats); err != nil {
+// bs 所有的随机字符串从此处取。
+func Bytes(min, max int, bs []byte) []byte {
+	if err := checkArgs(min, max, bs); err != nil {
 		panic(err)
 	}
 
-	return bytes(random, min+random.Intn(max-min), cats)
+	return bytes(random, min+random.Intn(max-min), bs)
 }
 
 // 产生一个随机字符串，其长度为[min, max)。
-// cats 随机字符串的类型，指定非法值是触发panic
-func String(min, max int, cats ...int) string {
-	return string(Bytes(min, max, cats...))
+// bs 可用的随机字符串。
+func String(min, max int, bs []byte) string {
+	return string(Bytes(min, max, bs))
 }
 
 // Rands 提供了对参数的简单包装，方便用户批量产生相同的类型的随机字符串。
 type Rands struct {
 	random    *rand.Rand
 	min, max  int
-	cats      []int
+	bytes     []byte
 	hasBuffer bool
 	channel   chan []byte
 }
@@ -73,8 +57,8 @@ type Rands struct {
 // 声明一个Rands变量。
 // seed 随机种子，若为0表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
-func New(seed int64, bufferSize, min, max int, cats ...int) (*Rands, error) {
-	if err := checkArgs(min, max, cats); err != nil {
+func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
+	if err := checkArgs(min, max, bs); err != nil {
 		return nil, err
 	}
 	if seed == 0 {
@@ -85,14 +69,14 @@ func New(seed int64, bufferSize, min, max int, cats ...int) (*Rands, error) {
 		random:    rand.New(rand.NewSource(seed)),
 		min:       min,
 		max:       max,
-		cats:      cats,
+		bytes:     bs,
 		hasBuffer: bufferSize > 0,
 	}
 	if ret.hasBuffer {
 		ret.channel = make(chan []byte, bufferSize)
 		go func() {
 			for {
-				ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), cats)
+				ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), bs)
 			}
 		}()
 	}
@@ -110,7 +94,7 @@ func (r *Rands) Bytes() []byte {
 		return <-r.channel
 	}
 
-	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.cats)
+	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes)
 }
 
 // 产生一个随机字符串，功能与全局函数String()相同，但参数通过New()预先指定。
@@ -123,25 +107,19 @@ func (r *Rands) String() string {
 }
 
 // 生成指定指定长度的随机字符数组
-func bytes(r *rand.Rand, l int, cats []int) []byte {
-	bs := make([]byte, 0, l)
-	i := 0
-	for {
-		for _, cat := range cats {
-			s := table[cat]
-			index := r.Intn(len(s))
-			bs = append(bs, s[index])
+func bytes(r *rand.Rand, l int, bs []byte) []byte {
+	ret := make([]byte, l, l)
 
-			i++
-			if i >= l {
-				return bs
-			}
-		} // end for cats
-	} // end for true
+	for i := 0; i < l; i++ {
+		index := r.Intn(len(bs))
+		ret[i] = bs[index]
+	}
+
+	return ret
 }
 
 // 检测各个参数是否合法
-func checkArgs(min, max int, cats []int) error {
+func checkArgs(min, max int, bs []byte) error {
 	if min <= 0 {
 		return errors.New("rands.checkArgs:min值必须大于0")
 	}
@@ -149,14 +127,8 @@ func checkArgs(min, max int, cats []int) error {
 		return errors.New("rands.checkArgs:max必须大于min")
 	}
 
-	if len(cats) == 0 {
-		return errors.New("rands.checkArgs:无效的cat参数")
-	}
-
-	for _, cat := range cats {
-		if cat < 0 || cat >= size {
-			return errors.New("rands.Bytes:无效的cat参数")
-		}
+	if len(bs) == 0 {
+		return errors.New("rands.checkArgs:无效的bs参数")
 	}
 
 	return nil
