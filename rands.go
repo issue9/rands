@@ -2,9 +2,9 @@
 // Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
-// 生成各种随机字符串的包
+// Package rands 生成各种随机字符串的包，仅是随机字符串，不保证唯一。
 //
-//  // 生成一个长度介于[6,9)之间的随机字符串
+//  // 生成一个长度介于 [6,9) 之间的随机字符串
 //  str := rands.String(6, 9, "1343567")
 //
 //  // 生成一个带缓存功能的随机字符串生成器
@@ -20,16 +20,16 @@ import (
 )
 
 // 供全局函数使用的随机函数生成。
-// Bytes和String依赖此项。
+// Bytes 和 String 依赖此项。
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-// 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
-// Bytes和String依赖此项。但是Rands有专门的随机函数，不受此影响。
+// Seed 手动指定一个随机种子，默认情况下使用当前包初始化时的时间戳作为随机种子。
+// Bytes 和 String 依赖此项。但是 Rands 有专门的随机函数，不受此影响。
 func Seed(seed int64) {
 	random = rand.New(rand.NewSource(seed))
 }
 
-// 产生随机字符数组，其长度为[min, max)。
+// Bytes 产生随机字符数组，其长度为[min, max)。
 // bs 所有的随机字符串从此处取。
 func Bytes(min, max int, bs []byte) []byte {
 	if err := checkArgs(min, max, bs); err != nil {
@@ -39,7 +39,7 @@ func Bytes(min, max int, bs []byte) []byte {
 	return bytes(random, min+random.Intn(max-min), bs)
 }
 
-// 产生一个随机字符串，其长度为[min, max)。
+// String 产生一个随机字符串，其长度为[min, max)。
 // bs 可用的随机字符串。
 func String(min, max int, bs []byte) string {
 	return string(Bytes(min, max, bs))
@@ -54,9 +54,9 @@ type Rands struct {
 	channel   chan []byte
 }
 
-// 声明一个Rands变量。
-// seed 随机种子，若为0表示使用当前时间作为随机种子。
-// bufferSize 缓存的随机字符串数量，若为0,表示不缓存。
+// New 声明一个 Rands 变量。
+// seed 随机种子，若为 0 表示使用当前时间作为随机种子。
+// bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
 func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
 	if err := checkArgs(min, max, bs); err != nil {
 		return nil, err
@@ -83,12 +83,12 @@ func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
 	return ret, nil
 }
 
-// 重新指定随机种子。
+// Seed 重新指定随机种子。
 func (r *Rands) Seed(seed int64) {
 	r.random.Seed(seed)
 }
 
-// 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
+// Bytes 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
 func (r *Rands) Bytes() []byte {
 	if r.hasBuffer {
 		return <-r.channel
@@ -97,7 +97,7 @@ func (r *Rands) Bytes() []byte {
 	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes)
 }
 
-// 产生一个随机字符串，功能与全局函数String()相同，但参数通过New()预先指定。
+// String 产生一个随机字符串，功能与全局函数 String() 相同，但参数通过 New() 预先指定。
 func (r *Rands) String() string {
 	if r.hasBuffer {
 		return string(<-r.channel)
@@ -121,14 +121,14 @@ func bytes(r *rand.Rand, l int, bs []byte) []byte {
 // 检测各个参数是否合法
 func checkArgs(min, max int, bs []byte) error {
 	if min <= 0 {
-		return errors.New("rands.checkArgs:min值必须大于0")
+		return errors.New("min 值必须大于 0")
 	}
 	if max <= min {
-		return errors.New("rands.checkArgs:max必须大于min")
+		return errors.New("max 必须大于 min")
 	}
 
 	if len(bs) == 0 {
-		return errors.New("rands.checkArgs:无效的bs参数")
+		return errors.New("无效的 bs 参数")
 	}
 
 	return nil
