@@ -8,7 +8,7 @@ str := rands.String(8, 10, []byte("1234567890abcdefg"))
 
 
 // 生成一个带缓存功能的随机字符串生成器
-r := rands.New(time.Now().Unix(), 100, 5, 7, []byte("asdfghijklmn"))
+r, err := rands.New(time.Now().Unix(), 100, 5, 7, []byte("asdfghijklmn"))
 str1 := r.String()
 str2 := r.String()
 ```

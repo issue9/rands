@@ -61,11 +61,15 @@ func TestRandsNoBuffer(t *testing.T) {
 func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(10000134, 100, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+	r, err := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	a.NotError(err).NotNil(r)
-	a.Equal(cap(r.channel), 100)
+	a.Equal(cap(r.channel), 2)
 
 	a.NotEqual(r.String(), r.String())
 	a.NotEqual(r.String(), r.String())
 	a.NotEqual(r.Bytes(), r.Bytes())
+
+	r.Stop()
+	a.NotEqual(r.String(), r.String()) // 读取 channel 中的数据
+	a.Equal(r.String(), r.String())    // 没有数据了，都是空值
 }

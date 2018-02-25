@@ -8,7 +8,7 @@
 //  str := rands.String(6, 9, "1343567")
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
+//  r, err := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
 //  str1 := r.String()
 //  str2 := r.String()
 package rands
@@ -52,9 +52,11 @@ type Rands struct {
 	bytes     []byte
 	hasBuffer bool
 	channel   chan []byte
+	done      chan struct{}
 }
 
 // New 声明一个 Rands 变量。
+//
 // seed 随机种子，若为 0 表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
 func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
@@ -71,13 +73,20 @@ func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
 		max:       max,
 		bytes:     bs,
 		hasBuffer: bufferSize > 0,
+		done:      make(chan struct{}),
 	}
 	if ret.hasBuffer {
 		ret.channel = make(chan []byte, bufferSize)
+
 		go func() {
 			for {
-				ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), bs)
-			}
+				select {
+				case <-ret.done:
+					close(ret.channel)
+					return
+				case ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), bs):
+				}
+			} // end ofr
 		}()
 	}
 	return ret, nil
@@ -91,7 +100,10 @@ func (r *Rands) Seed(seed int64) {
 // Bytes 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
 func (r *Rands) Bytes() []byte {
 	if r.hasBuffer {
-		return <-r.channel
+		if ret, ok := <-r.channel; ok {
+			return ret
+		}
+		return nil
 	}
 
 	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes)
@@ -104,6 +116,11 @@ func (r *Rands) String() string {
 	}
 
 	return string(r.Bytes())
+}
+
+// Stop 停止产生随机字符串
+func (r *Rands) Stop() {
+	r.done <- struct{}{}
 }
 
 // 生成指定指定长度的随机字符数组
