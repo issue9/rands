@@ -1,4 +1,5 @@
 rands [![Build Status](https://travis-ci.org/issue9/rands.svg?branch=master)](https://travis-ci.org/issue9/rands)
+[![codecov](https://codecov.io/gh/issue9/rands/branch/master/graph/badge.svg)](https://codecov.io/gh/issue9/rands)
 ======
 
 rands 为一个随机字符串生成工具。
