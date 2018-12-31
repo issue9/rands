@@ -19,6 +19,23 @@ import (
 	"time"
 )
 
+const (
+	alpha                  = "abcdefghijklmnopqrstuvwzyxABCDEFGHIJKLMNOPQRSTUVWZYX"
+	number                 = "1234567890"
+	punctuation            = "!@#$%^&*()_+[]{};':\",./<>?"
+	alphaNumber            = number + alpha
+	alphaNumberPunctuation = alphaNumber + punctuation
+)
+
+// 提供几种常见的随机字符组合方式
+var (
+	Alpha                  = []byte(alpha)
+	Number                 = []byte(number)
+	Punctuation            = []byte(punctuation)
+	AlphaNumber            = []byte(alphaNumber)
+	AlphaNumberPunctuation = []byte(alphaNumberPunctuation)
+)
+
 // 供全局函数使用的随机函数生成。
 // Bytes 和 String 依赖此项。
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
