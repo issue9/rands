@@ -1,4 +1,6 @@
-rands [![Build Status](https://travis-ci.org/issue9/rands.svg?branch=master)](https://travis-ci.org/issue9/rands)
+rands
+[![Build Status](https://travis-ci.org/issue9/rands.svg?branch=master)](https://travis-ci.org/issue9/rands)
+[![Build status](https://ci.appveyor.com/api/projects/status/do5gbhotlencsxff?svg=true)](https://ci.appveyor.com/project/caixw/rands)
 [![codecov](https://codecov.io/gh/issue9/rands/branch/master/graph/badge.svg)](https://codecov.io/gh/issue9/rands)
 ======
 
