@@ -36,6 +36,12 @@ var (
 	AlphaNumberPunctuation = []byte(alphaNumberPunctuation)
 )
 
+var (
+	errInvalidMin = errors.New("min 值必须大于 0")
+	errInvalidMax = errors.New("max 必须大于 min")
+	errInvalidBs  = errors.New("无效的 bs 参数")
+)
+
 // 供全局函数使用的随机函数生成。
 // Bytes 和 String 依赖此项。
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -78,8 +84,9 @@ type Rands struct {
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
 func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
 	if err := checkArgs(min, max, bs); err != nil {
-		return nil, err
+		panic(err)
 	}
+
 	if seed == 0 {
 		seed = time.Now().UnixNano()
 	}
@@ -155,14 +162,14 @@ func bytes(r *rand.Rand, l int, bs []byte) []byte {
 // 检测各个参数是否合法
 func checkArgs(min, max int, bs []byte) error {
 	if min <= 0 {
-		return errors.New("min 值必须大于 0")
+		return errInvalidMin
 	}
 	if max <= min {
-		return errors.New("max 必须大于 min")
+		return errInvalidMax
 	}
 
 	if len(bs) == 0 {
-		return errors.New("无效的 bs 参数")
+		return errInvalidBs
 	}
 
 	return nil
