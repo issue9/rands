@@ -14,15 +14,21 @@ func TestCheckArgs(t *testing.T) {
 	a := assert.New(t)
 
 	// min < 0
-	a.Error(checkArgs(-1, 1, []byte("12")))
+	a.Panic(func() {
+		checkArgs(-1, 1, []byte("12"))
+	})
 
 	// max <= min
-	a.Error(checkArgs(5, 5, []byte("12")))
+	a.Panic(func() {
+		checkArgs(5, 5, []byte("12"))
+	})
 
 	// cats为空
-	a.Error(checkArgs(5, 6, []byte("")))
+	a.Panic(func() {
+		checkArgs(5, 6, []byte(""))
+	})
 
-	a.NotError(checkArgs(5, 6, []byte("123")))
+	a.NotPanic(func() { checkArgs(5, 6, []byte("123")) })
 }
 
 // bytes

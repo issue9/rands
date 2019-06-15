@@ -14,7 +14,6 @@
 package rands
 
 import (
-	"errors"
 	"math/rand"
 	"time"
 )
@@ -36,12 +35,6 @@ var (
 	AlphaNumberPunctuation = []byte(alphaNumberPunctuation)
 )
 
-var (
-	errInvalidMin = errors.New("min 值必须大于 0")
-	errInvalidMax = errors.New("max 必须大于 min")
-	errInvalidBs  = errors.New("无效的 bs 参数")
-)
-
 // 供全局函数使用的随机函数生成。
 // Bytes 和 String 依赖此项。
 var random = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -55,9 +48,7 @@ func Seed(seed int64) {
 // Bytes 产生随机字符数组，其长度为[min, max)。
 // bs 所有的随机字符串从此处取。
 func Bytes(min, max int, bs []byte) []byte {
-	if err := checkArgs(min, max, bs); err != nil {
-		panic(err)
-	}
+	checkArgs(min, max, bs)
 
 	return bytes(random, min+random.Intn(max-min), bs)
 }
@@ -83,9 +74,7 @@ type Rands struct {
 // seed 随机种子，若为 0 表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
 func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
-	if err := checkArgs(min, max, bs); err != nil {
-		panic(err)
-	}
+	checkArgs(min, max, bs)
 
 	if seed == 0 {
 		seed = time.Now().UnixNano()
@@ -160,17 +149,15 @@ func bytes(r *rand.Rand, l int, bs []byte) []byte {
 }
 
 // 检测各个参数是否合法
-func checkArgs(min, max int, bs []byte) error {
+func checkArgs(min, max int, bs []byte) {
 	if min <= 0 {
-		return errInvalidMin
+		panic("min 值必须大于 0")
 	}
 	if max <= min {
-		return errInvalidMax
+		panic("max 必须大于 min")
 	}
 
 	if len(bs) == 0 {
-		return errInvalidBs
+		panic("无效的 bs 参数")
 	}
-
-	return nil
 }
