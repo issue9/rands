@@ -1,6 +1,4 @@
-// Copyright 2016 by caixw, All rights reserved.
-// Use of this source code is governed by a MIT
-// license that can be found in the LICENSE file.
+// SPDX-License-Identifier: MIT
 
 // Package rands 生成各种随机字符串的包，仅是随机字符串，不保证唯一。
 //
