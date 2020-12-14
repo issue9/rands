@@ -2,6 +2,7 @@ rands
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fissue9%2Frands%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/issue9/rands/goto?ref=master)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/issue9/rands/branch/master/graph/badge.svg)](https://codecov.io/gh/issue9/rands)
+[![Go Reference](https://pkg.go.dev/badge/github.com/issue9/rands.svg)](https://pkg.go.dev/github.com/issue9/rands)
 ======
 
 rands 为一个随机字符串生成工具。
@@ -23,12 +24,6 @@ str2 := r.String()
 ```shell
 go get github.com/issue9/rands
 ```
-
-文档
-----
-
-[![Go Walker](https://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/issue9/rands)
-[![GoDoc](https://godoc.org/github.com/issue9/rands?status.svg)](https://godoc.org/github.com/issue9/rands)
 
 版权
 ----
