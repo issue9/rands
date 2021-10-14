@@ -25,8 +25,8 @@ _testmain.go
 
 # ide
 *.swp
-idea/
-vscode/
+.idea/
+.vscode/
 
 # 测试文件
 test.db
