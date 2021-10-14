@@ -6,7 +6,7 @@
 //  str := rands.String(6, 9, "1343567")
 //
 //  // 生成一个带缓存功能的随机字符串生成器
-//  r, err := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
+//  r := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
 //  str1 := r.String()
 //  str2 := r.String()
 package rands
@@ -71,7 +71,7 @@ type Rands struct {
 //
 // seed 随机种子，若为 0 表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
-func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
+func New(seed int64, bufferSize, min, max int, bs []byte) *Rands {
 	checkArgs(min, max, bs)
 
 	if seed == 0 {
@@ -100,7 +100,7 @@ func New(seed int64, bufferSize, min, max int, bs []byte) (*Rands, error) {
 			} // end ofr
 		}()
 	}
-	return ret, nil
+	return ret
 }
 
 // Seed 重新指定随机种子。

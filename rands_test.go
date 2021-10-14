@@ -53,8 +53,8 @@ func TestBytes2(t *testing.T) {
 func TestRandsNoBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(0, 0, 5, 7, []byte("ad;fqeqwejqw;ejnweqwer"))
-	a.NotError(err).NotNil(r)
+	r := New(0, 0, 5, 7, []byte("ad;fqeqwejqw;ejnweqwer"))
+	a.NotNil(r)
 	a.Equal(cap(r.channel), 0)
 
 	a.NotEqual(r.Bytes(), r.Bytes())
@@ -65,8 +65,8 @@ func TestRandsNoBuffer(t *testing.T) {
 func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t)
 
-	r, err := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
-	a.NotError(err).NotNil(r)
+	r := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+	a.NotNil(r)
 	a.Equal(cap(r.channel), 2)
 
 	a.NotEqual(r.String(), r.String())
