@@ -5,11 +5,11 @@ package rands
 import (
 	"testing"
 
-	"github.com/issue9/assert"
+	"github.com/issue9/assert/v2"
 )
 
 func TestCheckArgs(t *testing.T) {
-	a := assert.New(t)
+	a := assert.New(t, false)
 
 	// min < 0
 	a.Panic(func() {
@@ -31,7 +31,7 @@ func TestCheckArgs(t *testing.T) {
 
 // bytes
 func TestBytes1(t *testing.T) {
-	a := assert.New(t)
+	a := assert.New(t, false)
 
 	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
 	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
@@ -40,7 +40,7 @@ func TestBytes1(t *testing.T) {
 
 // Bytes
 func TestBytes2(t *testing.T) {
-	a := assert.New(t)
+	a := assert.New(t, false)
 
 	// 测试固定长度
 	a.Equal(len(Bytes(8, 9, []byte("1ks;dfp123;4j;ladj;fpoqwe"))), 8)
@@ -51,7 +51,7 @@ func TestBytes2(t *testing.T) {
 }
 
 func TestRandsNoBuffer(t *testing.T) {
-	a := assert.New(t)
+	a := assert.New(t, false)
 
 	r := New(0, 0, 5, 7, []byte("ad;fqeqwejqw;ejnweqwer"))
 	a.NotNil(r)
@@ -63,7 +63,7 @@ func TestRandsNoBuffer(t *testing.T) {
 }
 
 func TestRandsBuffer(t *testing.T) {
-	a := assert.New(t)
+	a := assert.New(t, false)
 
 	r := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	a.NotNil(r)
