@@ -10,7 +10,6 @@ import (
 )
 
 // 固定长度的随机字符串
-// BenchmarkBytes_6_7_Lower-4  	 5000000	       245 ns/op
 func BenchmarkBytes_6_7_Lower(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Bytes(6, 7, []byte("abcdefghijklmnopkrstuvwxyz"))
@@ -18,43 +17,38 @@ func BenchmarkBytes_6_7_Lower(b *testing.B) {
 }
 
 // 固定长度的随机字符串
-// BenchmarkBytes_6_7_All-4    	 5000000	       298 ns/op
 func BenchmarkBytes_6_7_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(6, 7, []byte("abcdefghijklmnopkrstuvwxyzABCDEFGHIJKLMNOPKRSTUVWXYZ1234567890!@#$%^&*()_+~|[]{};':\",./<>?\\|"))
+		Bytes(6, 7, []byte(alphaNumberPunctuation))
 	}
 }
 
-// BenchmarkBytes_4_6_Lower-4  	10000000	       211 ns/op
 func BenchmarkBytes_4_6_Lower(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Bytes(4, 6, []byte("abcdefghijklmnopkrstuvwxyz"))
 	}
 }
 
-// BenchmarkBytes_4_6_All-4    	 5000000	       264 ns/op
 func BenchmarkBytes_4_6_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(4, 6, []byte("abcdefghijklmnopkrstuvwxyzABCDEFGHIJKLMNOPKRSTUVWXYZ1234567890!@#$%^&*()_+~|[]{};':\",./<>?\\|"))
+		Bytes(4, 6, []byte(alphaNumberPunctuation))
 	}
 }
 
-// BenchmarkBytes_10_32_Lower-4	 2000000	       618 ns/op
 func BenchmarkBytes_10_32_Lower(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Bytes(10, 32, []byte("abcdefghijklmnopkrstuvwxyz"))
 	}
 }
 
-// BenchmarkBytes_10_32_All-4  	 2000000	       658 ns/op
 func BenchmarkBytes_10_32_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(10, 32, []byte("abcdefghijklmnopkrstuvwxyzABCDEFGHIJKLMNOPKRSTUVWXYZ1234567890!@#$%^&*()_+~|[]{};':\",./<>?\\|"))
+		Bytes(10, 32, []byte(alphaNumberPunctuation))
 	}
 }
 
 // crypto/rand包的随机读取能力
-func BenchmarkCryptoRand(b *testing.B) {
+func BenchmarkCryptoRand_10(b *testing.B) {
 	bs := make([]byte, 10, 10)
 	for i := 0; i < b.N; i++ {
 		rand.Read(bs)

@@ -47,7 +47,6 @@ func Seed(seed int64) {
 // bs 所有的随机字符串从此处取。
 func Bytes(min, max int, bs []byte) []byte {
 	checkArgs(min, max, bs)
-
 	return bytes(random, min+random.Intn(max-min), bs)
 }
 
@@ -104,9 +103,7 @@ func New(seed int64, bufferSize, min, max int, bs []byte) *Rands {
 }
 
 // Seed 重新指定随机种子。
-func (r *Rands) Seed(seed int64) {
-	r.random.Seed(seed)
-}
+func (r *Rands) Seed(seed int64) { r.random.Seed(seed) }
 
 // Bytes 产生随机字符数组，功能与全局函数Bytes()相同，但参数通过New()预先指定。
 func (r *Rands) Bytes() []byte {
@@ -130,9 +127,7 @@ func (r *Rands) String() string {
 }
 
 // Stop 停止产生随机字符串
-func (r *Rands) Stop() {
-	r.done <- struct{}{}
-}
+func (r *Rands) Stop() { r.done <- struct{}{} }
 
 // 生成指定指定长度的随机字符数组
 func bytes(r *rand.Rand, l int, bs []byte) []byte {
