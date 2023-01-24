@@ -49,7 +49,7 @@ func BenchmarkBytes_10_32_All(b *testing.B) {
 
 // crypto/rand包的随机读取能力
 func BenchmarkCryptoRand_10(b *testing.B) {
-	bs := make([]byte, 10, 10)
+	bs := make([]byte, 10)
 	for i := 0; i < b.N; i++ {
 		rand.Read(bs)
 	}
