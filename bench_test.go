@@ -19,7 +19,7 @@ func BenchmarkBytes_6_7_Lower(b *testing.B) {
 // 固定长度的随机字符串
 func BenchmarkBytes_6_7_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(6, 7, []byte(alphaNumberPunctuation))
+		Bytes(6, 7, AlphaNumberPunct())
 	}
 }
 
@@ -31,7 +31,7 @@ func BenchmarkBytes_4_6_Lower(b *testing.B) {
 
 func BenchmarkBytes_4_6_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(4, 6, []byte(alphaNumberPunctuation))
+		Bytes(4, 6, AlphaNumberPunct())
 	}
 }
 
@@ -43,7 +43,7 @@ func BenchmarkBytes_10_32_Lower(b *testing.B) {
 
 func BenchmarkBytes_10_32_All(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Bytes(10, 32, []byte(alphaNumberPunctuation))
+		Bytes(10, 32, AlphaNumberPunct())
 	}
 }
 

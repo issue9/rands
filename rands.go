@@ -7,6 +7,9 @@
 //
 //	// 生成一个带缓存功能的随机字符串生成器
 //	r := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
+//	ctx,cancel := context.WithCancel(context.Background())
+//	go r.Serve(ctx)
+//	defer cancel()
 //	str1 := r.String()
 //	str2 := r.String()
 //
@@ -14,30 +17,31 @@
 package rands
 
 import (
+	"context"
 	"math/rand"
 	"time"
 )
 
-const (
-	alpha                  = "abcdefghijklmnopqrstuvwzyxABCDEFGHIJKLMNOPQRSTUVWZYX"
-	number                 = "1234567890"
-	punctuation            = "!@#$%^&*()_+[]{};':\",./<>?"
-	alphaNumber            = number + alpha
-	alphaNumberPunctuation = alphaNumber + punctuation
-)
-
-// 提供几种常见的随机字符组合方式
 var (
-	Alpha                  = []byte(alpha)
-	Number                 = []byte(number)
-	Punctuation            = []byte(punctuation)
-	AlphaNumber            = []byte(alphaNumber)
-	AlphaNumberPunctuation = []byte(alphaNumberPunctuation)
+	chars = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+[]{};':\",./<>?")
+
+	random = rand.New(rand.NewSource(time.Now().UnixNano())) // 供全局函数使用的随机函数
 )
 
-// 供全局函数使用的随机函数生成。
-// Bytes 和 String 依赖此项。
-var random = rand.New(rand.NewSource(time.Now().UnixNano()))
+// Alpha 返回所有的字母
+func Alpha() []byte { return chars[0:52] }
+
+// Number 返回所有的数字
+func Number() []byte { return chars[52:62] }
+
+// Punct 返回所有的标点符号
+func Punct() []byte { return chars[62:] }
+
+// AlphaNumber [Alpha] + [Number]
+func AlphaNumber() []byte { return chars[0:62] }
+
+// AlphaNumberPunct [Alpha] + [Number] + [Punct]
+func AlphaNumberPunct() []byte { return chars }
 
 // Seed 手动指定一个随机种子
 //
@@ -56,18 +60,14 @@ func Bytes(min, max int, bs []byte) []byte {
 // String 产生一个随机字符串
 //
 // 其长度为[min, max)，bs 可用的随机字符串。
-func String(min, max int, bs []byte) string {
-	return string(Bytes(min, max, bs))
-}
+func String(min, max int, bs []byte) string { return string(Bytes(min, max, bs)) }
 
 // Rands 提供随机字符串的生成
 type Rands struct {
-	random    *rand.Rand
-	min, max  int
-	bytes     []byte
-	hasBuffer bool
-	channel   chan []byte
-	done      chan struct{}
+	random   *rand.Rand
+	min, max int
+	bytes    []byte
+	channel  chan []byte
 }
 
 // New 声明一个 Rands 变量
@@ -77,33 +77,21 @@ type Rands struct {
 func New(seed int64, bufferSize, min, max int, bs []byte) *Rands {
 	checkArgs(min, max, bs)
 
+	if bufferSize <= 0 {
+		panic("bufferSize 必须大于零")
+	}
+
 	if seed == 0 {
 		seed = time.Now().UnixNano()
 	}
 
-	ret := &Rands{
-		random:    rand.New(rand.NewSource(seed)),
-		min:       min,
-		max:       max,
-		bytes:     bs,
-		hasBuffer: bufferSize > 0,
-		done:      make(chan struct{}),
+	return &Rands{
+		random:  rand.New(rand.NewSource(seed)),
+		min:     min,
+		max:     max,
+		bytes:   bs,
+		channel: make(chan []byte, bufferSize),
 	}
-	if ret.hasBuffer {
-		ret.channel = make(chan []byte, bufferSize)
-
-		go func() {
-			for {
-				select {
-				case <-ret.done:
-					close(ret.channel)
-					return
-				case ret.channel <- bytes(ret.random, min+ret.random.Intn(max-min), bs):
-				}
-			} // end for
-		}()
-	}
-	return ret
 }
 
 // Seed 重新指定随机种子
@@ -112,35 +100,21 @@ func (r *Rands) Seed(seed int64) { r.random.Seed(seed) }
 // Bytes 产生随机字符数组
 //
 // 功能与全局函数 [Bytes] 相同，但参数通过 [New] 预先指定。
-func (r *Rands) Bytes() []byte {
-	if r.hasBuffer {
-		if ret, ok := <-r.channel; ok {
-			return ret
-		}
-		return nil
-	}
-
-	return bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes)
-}
+func (r *Rands) Bytes() []byte { return <-r.channel }
 
 // String 产生一个随机字符串
 //
 // 功能与全局函数 [String] 相同，但参数通过 [New] 预先指定。
-func (r *Rands) String() string {
-	if r.hasBuffer {
-		return string(<-r.channel)
-	}
+func (r *Rands) String() string { return string(<-r.channel) }
 
-	return string(r.Bytes())
-}
-
-// Stop 停止产生随机字符串
-//
-// 如果 [New] 的 bufferSize 为零，则此方法可以不调用。
-// 否则需要此方法关闭随机字符串的生成。
-func (r *Rands) Stop() {
-	if r.hasBuffer {
-		r.done <- struct{}{}
+func (r *Rands) Serve(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			close(r.channel)
+			return ctx.Err()
+		case r.channel <- bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes):
+		}
 	}
 }
 

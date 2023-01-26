@@ -14,6 +14,9 @@ str := rands.String(8, 10, []byte("1234567890abcdefg"))
 
 // 生成一个带缓存功能的随机字符串生成器
 r, err := rands.New(time.Now().Unix(), 100, 5, 7, []byte("asdfghijklmn"))
+ctx,cancel := context.WithCancel(context.Background())
+go r.Serve(ctx)
+defer cancel()
 str1 := r.String()
 str2 := r.String()
 ```
@@ -22,7 +25,7 @@ str2 := r.String()
 ----
 
 ```shell
-go get github.com/issue9/rands
+go get github.com/issue9/rands/v2
 ```
 
 版权

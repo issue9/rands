@@ -3,10 +3,36 @@
 package rands
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/issue9/assert/v3"
 )
+
+func TestChars(t *testing.T) {
+	a := assert.New(t, false)
+
+	s := Alpha()
+	a.Equal(s[0], 'a').
+		Equal(s[len(s)-1], 'Z')
+
+	s = Number()
+	a.Equal(s[0], '1').
+		Equal(s[len(s)-1], '0')
+
+	s = Punct()
+	a.Equal(s[0], '!').
+		Equal(s[len(s)-1], '?')
+
+	s = AlphaNumber()
+	a.Equal(s[0], 'a').
+		Equal(s[len(s)-1], '0')
+
+	s = AlphaNumberPunct()
+	a.Equal(s[0], 'a').
+		Equal(s[len(s)-1], '?')
+}
 
 func TestCheckArgs(t *testing.T) {
 	a := assert.New(t, false)
@@ -50,30 +76,26 @@ func TestBytes2(t *testing.T) {
 	a.True(l >= 8 && l <= 10)
 }
 
-func TestRandsNoBuffer(t *testing.T) {
-	a := assert.New(t, false)
-
-	r := New(0, 0, 5, 7, []byte("ad;fqeqwejqw;ejnweqwer"))
-	a.NotNil(r)
-	a.Equal(cap(r.channel), 0)
-
-	a.NotEqual(r.Bytes(), r.Bytes())
-	a.NotEqual(r.Bytes(), r.Bytes())
-	a.NotEqual(r.String(), r.String())
-}
-
 func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t, false)
 
+	a.PanicString(func() {
+		New(10000134, 0, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+	}, "bufferSize 必须大于零")
+
 	r := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	a.NotNil(r)
+	ctx, cancel := context.WithCancel(context.Background())
+	go r.Serve(ctx)
+	time.Sleep(time.Microsecond * 500) // 等待 go 运行完成
 	a.Equal(cap(r.channel), 2)
 
 	a.NotEqual(r.String(), r.String())
 	a.NotEqual(r.String(), r.String())
 	a.NotEqual(r.Bytes(), r.Bytes())
 
-	r.Stop()
-	a.NotEqual(r.String(), r.String()) // 读取 channel 中的数据
+	cancel()
+	time.Sleep(time.Microsecond * 500) // 等待 cancel 运行完成
+	a.NotEqual(r.String(), r.String()) // 读取 channel 中剩余的数据
 	a.Equal(r.String(), r.String())    // 没有数据了，都是空值
 }
