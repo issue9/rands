@@ -2,7 +2,7 @@ rands
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fissue9%2Frands%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/issue9/rands/goto?ref=master)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/issue9/rands/branch/master/graph/badge.svg)](https://codecov.io/gh/issue9/rands)
-[![Go Reference](https://pkg.go.dev/badge/github.com/issue9/rands.svg)](https://pkg.go.dev/github.com/issue9/rands)
+[![Go Reference](https://pkg.go.dev/badge/github.com/issue9/rands.svg)](https://pkg.go.dev/github.com/issue9/rands/v2)
 ======
 
 rands 为一个随机字符串生成工具。
