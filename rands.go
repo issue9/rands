@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2016-2024 caixw
+//
 // SPDX-License-Identifier: MIT
 
 // Package rands 生成各种随机字符串
