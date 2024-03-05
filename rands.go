@@ -49,7 +49,7 @@ func AlphaNumberPunct() []byte { return chars }
 //
 // 默认情况下使用当前包初始化时的时间戳作为随机种子。
 // [Bytes] 和 [String] 依赖此项。但是 [Rands] 有专门的随机函数，不受此影响。
-func Seed(seed int64) { random = rand.New(rand.NewSource(seed)) }
+func Seed(seed int64) { random = rand.New(rand.NewSource(seed)) } // TODO(go1.22) 改为 rand/v2
 
 // Bytes 产生随机字符数组
 //
