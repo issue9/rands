@@ -60,10 +60,14 @@ func TestCheckArgs(t *testing.T) {
 // bytes
 func TestBytes1(t *testing.T) {
 	a := assert.New(t, false)
+	r1 := random
+	r2 := random
 
-	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
+
+	println("String:", String(10, 11, AlphaNumberPunct()))
 }
 
 // Bytes

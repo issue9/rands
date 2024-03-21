@@ -129,11 +129,30 @@ func bytes(r *rand.Rand, min, max int, bs []byte) []byte {
 		l = min + r.Intn(max-min)
 	}
 
-	ret := make([]byte, l)
+	ll := uint64(len(bs))
 
-	for i := 0; i < l; i++ {
-		index := r.Intn(len(bs))
-		ret[i] = bs[index]
+	// 将一个 uint64 的随机数据，按 bs 的长度拆分为多个数组下标。
+	// 比如 bs 的长度为 10，那么一个 uint64 的随机数，
+	// 理论上可以表示 64 / 10 = 6 个数组下标从 bs 中拿值。
+
+	var bit int     // 表示 len(bs) 下标的最大数值需要的位数
+	var mask uint64 // bit 的掩码
+	for bit = 0; bit < 64; bit++ {
+		if mask = 1<<bit - 1; mask >= ll {
+			break
+		}
+	}
+
+	ret := make([]byte, l)
+	for i := 0; i < l; {
+		// 在 index 不够大时，index>>bit 可能会让 index 变为 0，为 0 的 index 应该抛弃。
+		for index := r.Uint64(); index > 0 && i < l; {
+			if idx := index & mask; idx < ll {
+				ret[i] = bs[idx]
+				i++
+			}
+			index >>= bit
+		}
 	}
 
 	return ret
