@@ -61,9 +61,9 @@ func TestCheckArgs(t *testing.T) {
 func TestBytes1(t *testing.T) {
 	a := assert.New(t, false)
 
-	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
-	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
-	a.NotEqual(bytes(random, 10, []byte("1234123lks;df")), bytes(random, 10, []byte("1234123lks;df")))
+	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(random, 10, 11, []byte("1234123lks;df")), bytes(random, 10, 11, []byte("1234123lks;df")))
 }
 
 // Bytes

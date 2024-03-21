@@ -9,6 +9,12 @@ import (
 	"testing"
 )
 
+func BenchmarkString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		String(6, 7, []byte("abcdefghijklmnopkrstuvwxyz"))
+	}
+}
+
 // 固定长度的随机字符串
 func BenchmarkBytes_6_7_Lower(b *testing.B) {
 	for i := 0; i < b.N; i++ {

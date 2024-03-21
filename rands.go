@@ -56,12 +56,12 @@ func Seed(seed int64) { random = rand.New(rand.NewSource(seed)) } // TODO(go1.22
 // 其长度为[min, max)，bs 所有的随机字符串从此处取。
 func Bytes(min, max int, bs []byte) []byte {
 	checkArgs(min, max, bs)
-	return bytes(random, min+random.Intn(max-min), bs)
+	return bytes(random, min, max, bs)
 }
 
 // String 产生一个随机字符串
 //
-// 其长度为[min, max)，bs 可用的随机字符串。
+// 其长度为[min, max)，bs 可用的随机字符。
 func String(min, max int, bs []byte) string { return string(Bytes(min, max, bs)) }
 
 // Rands 提供随机字符串的生成
@@ -72,7 +72,7 @@ type Rands struct {
 	channel  chan []byte
 }
 
-// New 声明一个 Rands 变量
+// New 声明 [Rands]
 //
 // seed 随机种子，若为 0 表示使用当前时间作为随机种子。
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
@@ -115,13 +115,20 @@ func (r *Rands) Serve(ctx context.Context) error {
 		case <-ctx.Done():
 			close(r.channel)
 			return ctx.Err()
-		case r.channel <- bytes(r.random, r.min+r.random.Intn(r.max-r.min), r.bytes):
+		case r.channel <- bytes(r.random, r.min, r.max, r.bytes):
 		}
 	}
 }
 
-// 生成指定指定长度的随机字符数组
-func bytes(r *rand.Rand, l int, bs []byte) []byte {
+// 生成介于 [min,max) 长度的随机字符数组
+func bytes(r *rand.Rand, min, max int, bs []byte) []byte {
+	var l int
+	if max-1 == min {
+		l = min
+	} else {
+		l = min + r.Intn(max-min)
+	}
+
 	ret := make([]byte, l)
 
 	for i := 0; i < l; i++ {
