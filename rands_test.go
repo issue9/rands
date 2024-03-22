@@ -9,33 +9,10 @@ import (
 	"math/rand/v2"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/issue9/assert/v4"
 )
-
-func TestChars(t *testing.T) {
-	a := assert.New(t, false)
-
-	s := Alpha()
-	a.Equal(s[0], 'a').
-		Equal(s[len(s)-1], 'Z')
-
-	s = Number()
-	a.Equal(s[0], '1').
-		Equal(s[len(s)-1], '0')
-
-	s = Punct()
-	a.Equal(s[0], '!').
-		Equal(s[len(s)-1], '?')
-
-	s = AlphaNumber()
-	a.Equal(s[0], 'a').
-		Equal(s[len(s)-1], '0')
-
-	s = AlphaNumberPunct()
-	a.Equal(s[0], 'a').
-		Equal(s[len(s)-1], '?')
-}
 
 func TestCheckArgs(t *testing.T) {
 	a := assert.New(t, false)
@@ -58,32 +35,42 @@ func TestCheckArgs(t *testing.T) {
 	a.NotPanic(func() { checkArgs(5, 6, []byte("123")) })
 }
 
-// bytes
-func TestBytes1(t *testing.T) {
+func TestGen(t *testing.T) {
 	a := assert.New(t, false)
+
 	r1 := rand.IntN
 	r2 := rand.Uint64
-
-	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
-
-	println("String:", String(10, 11, AlphaNumberPunct()))
+	a.NotEqual(gen(r1, r2, 10, 11, []byte("1234123lks;df")), gen(r1, r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(gen(r1, r2, 10, 11, []byte("1234123lks;df")), gen(r1, r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(gen(r1, r2, 10, 11, []byte("1234123lks;df")), gen(r1, r2, 10, 11, []byte("1234123lks;df")))
 }
 
-// Bytes
-func TestBytes2(t *testing.T) {
+// Chars
+func TestBytes(t *testing.T) {
 	a := assert.New(t, false)
 
 	// 测试固定长度
 	a.Equal(len(Bytes(8, 9, []byte("1ks;dfp123;4j;ladj;fpoqwe"))), 8)
+	a.Equal(utf8.RuneCount(Bytes(8, 9, []rune("中文内容也可以正常显示"))), 8)
 
 	// 非固定长度
 	l := len(Bytes(8, 10, []byte("adf;wieqpwekwjerpq")))
 	a.True(l >= 8 && l <= 10)
+
 }
 
-func TestRandsBuffer(t *testing.T) {
+func TestString(t *testing.T) {
+	a := assert.New(t, false)
+
+	// 查看是否输出完整的字符
+	val := String(10, 11, []rune("中文内容也d可e以正常显示abc"))
+	t.Log("这将显示一段随机的中英文：", val)
+	for _, r := range val {
+		a.True(utf8.ValidRune(r))
+	}
+}
+
+func TestRands(t *testing.T) {
 	a := assert.New(t, false)
 
 	a.PanicString(func() {

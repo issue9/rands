@@ -5,10 +5,10 @@
 // Package rands 生成各种随机字符串
 //
 //	// 生成一个长度介于 [6,9) 之间的随机字符串
-//	str := rands.String(6, 9, "1343567")
+//	str := rands.String(6, 9, []byte("1343567"))
 //
 //	// 生成一个带缓存功能的随机字符串生成器
-//	r := rands.New(nil, 100, 5, 7, "adbcdefgadf;dfe1334")
+//	r := rands.New(nil, 100, 5, 7, []byte("adbcdefgadf;dfe1334"))
 //	ctx,cancel := context.WithCancel(context.Background())
 //	go r.Serve(ctx)
 //	defer cancel()
@@ -19,30 +19,40 @@
 package rands
 
 import (
+	"bytes"
 	"context"
 	"math/rand/v2"
+	"unsafe"
 )
 
-// Bytes 产生随机字符数组
+// Char 约束随机字符串字符的类型
 //
-// 其长度为[min, max)，bs 所有的随机字符串从此处取。
-func Bytes(min, max int, bs []byte) []byte {
+// byte 的性能为好于 rune。
+type Char interface{ ~byte | ~rune }
+
+// Bytes 从 bs 中随机抓取 [min,max) 个字符并返回
+//
+// NOTE: bs 的类型可以是 rune，但是返回类型始终是 []byte，所以用 len 判断返回值可能其值会很大。
+func Bytes[T Char](min, max int, bs []T) []byte {
 	checkArgs(min, max, bs)
-	return bytes(rand.IntN, rand.Uint64, min, max, bs)
+	return gen(rand.IntN, rand.Uint64, min, max, bs)
 }
 
 // String 产生一个随机字符串
 //
 // 其长度为[min, max)，bs 可用的随机字符。
-func String(min, max int, bs []byte) string { return string(Bytes(min, max, bs)) }
+func String[T Char](min, max int, bs []T) string {
+	cs := Bytes(min, max, bs)
+	return unsafe.String(unsafe.SliceData(cs), len(cs))
+}
 
 // Rands 提供随机字符串的生成
-type Rands struct {
+type Rands[T Char] struct {
 	intn func(int) int
 	u64  func() uint64
 
 	min, max int
-	bytes    []byte
+	bytes    []T
 	channel  chan []byte
 }
 
@@ -50,7 +60,7 @@ type Rands struct {
 //
 // 如果 r 为 nil，将采用默认的随机函数；
 // bufferSize 缓存的随机字符串数量，若为 0,表示不缓存；
-func New(r *rand.Rand, bufferSize, min, max int, bs []byte) *Rands {
+func New[T Char](r *rand.Rand, bufferSize, min, max int, bs []T) *Rands[T] {
 	checkArgs(min, max, bs)
 
 	if bufferSize <= 0 {
@@ -67,7 +77,7 @@ func New(r *rand.Rand, bufferSize, min, max int, bs []byte) *Rands {
 		u64 = rand.Uint64
 	}
 
-	return &Rands{
+	return &Rands[T]{
 		intn: intn,
 		u64:  u64,
 
@@ -81,26 +91,32 @@ func New(r *rand.Rand, bufferSize, min, max int, bs []byte) *Rands {
 // Bytes 产生随机字符数组
 //
 // 功能与全局函数 [Bytes] 相同，但参数通过 [New] 预先指定。
-func (r *Rands) Bytes() []byte { return <-r.channel }
+func (r *Rands[T]) Bytes() []byte { return <-r.channel }
 
 // String 产生一个随机字符串
 //
 // 功能与全局函数 [String] 相同，但参数通过 [New] 预先指定。
-func (r *Rands) String() string { return string(<-r.channel) }
+func (r *Rands[T]) String() string {
+	cs := r.Bytes()
+	return unsafe.String(unsafe.SliceData(cs), len(cs))
+}
 
-func (r *Rands) Serve(ctx context.Context) error {
+func (r *Rands[T]) Serve(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
 			close(r.channel)
 			return ctx.Err()
-		case r.channel <- bytes(r.intn, r.u64, r.min, r.max, r.bytes):
+		case r.channel <- gen(r.intn, r.u64, r.min, r.max, r.bytes):
 		}
 	}
 }
 
 // 生成介于 [min,max) 长度的随机字符数组
-func bytes(intN func(int) int, u64 func() uint64, min, max int, bs []byte) []byte {
+//
+// intN 用于生成一个介于 [min, max) 之间的数据；
+// u64 用生成一个 uint64 的随机数；
+func gen[T Char](intN func(int) int, u64 func() uint64, min, max int, bs []T) []byte {
 	var l int
 	if max-1 == min {
 		l = min
@@ -122,23 +138,40 @@ func bytes(intN func(int) int, u64 func() uint64, min, max int, bs []byte) []byt
 		}
 	}
 
-	ret := make([]byte, l)
-	for i := 0; i < l; {
-		// 在 index 不够大时，index>>bit 可能会让 index 变为 0，为 0 的 index 应该抛弃。
-		for index := u64(); index > 0 && i < l; {
-			if idx := index & mask; idx < ll {
-				ret[i] = bs[idx]
-				i++
+	if _, isRune := any(bs).([]rune); !isRune {
+		ret := make([]byte, l)
+		for i := 0; i < l; { // 循环内会增加 i 的值。比直接使用 for i:= range l 要快。
+			// 在 index 不够大时，index>>bit 可能会让 index 提早变为 0，为 0 的 index 应该抛弃。
+			for index := u64(); index > 0 && i < l; {
+				if idx := index & mask; idx < ll {
+					ret[i] = byte(bs[idx])
+					i++
+				}
+				index >>= bit
 			}
-			index >>= bit
 		}
-	}
+		return ret
+	} else {
+		s := bytes.Buffer{}
+		s.Grow(2 * l)
 
-	return ret
+		for i := 0; i < l; { // 循环内会增加 i 的值。比直接使用 for i:= range l 要快。
+			// 在 index 不够大时，index>>bit 可能会让 index 提早变为 0，为 0 的 index 应该抛弃。
+			for index := u64(); index > 0 && i < l; {
+				if idx := index & mask; idx < ll {
+					s.WriteRune(rune(bs[idx]))
+					i++
+				}
+				index >>= bit
+			}
+		}
+
+		return s.Bytes()
+	}
 }
 
 // 检测各个参数是否合法
-func checkArgs(min, max int, bs []byte) {
+func checkArgs[T Char](min, max int, bs []T) {
 	if min <= 0 {
 		panic("min 值必须大于 0")
 	}

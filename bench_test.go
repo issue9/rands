@@ -10,9 +10,17 @@ import (
 )
 
 func BenchmarkString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		String(6, 7, []byte("abcdefghijklmnopkrstuvwxyz"))
-	}
+	b.Run("bytes", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			String(6, 7, []byte("abcdefghijklmnopkrstuvwxyz"))
+		}
+	})
+
+	b.Run("runes", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			String(6, 7, []rune("中文内容也可以正常显示"))
+		}
+	})
 }
 
 // 固定长度的随机字符串
@@ -48,9 +56,17 @@ func BenchmarkBytes_10_32_Lower(b *testing.B) {
 }
 
 func BenchmarkBytes_10_32_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Bytes(10, 32, AlphaNumberPunct())
-	}
+	b.Run("bytes", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			Bytes(10, 32, AlphaNumberPunct())
+		}
+	})
+
+	b.Run("runes", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			Bytes(10, 32, []rune("中文内容也可以正常显示中文内容也可以正常显示"))
+		}
+	})
 }
 
 // crypto/rand包的随机读取能力
