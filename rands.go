@@ -8,7 +8,7 @@
 //	str := rands.String(6, 9, "1343567")
 //
 //	// 生成一个带缓存功能的随机字符串生成器
-//	r := rands.New(time.Now().Unix(), 100, 5, 7, "adbcdefgadf;dfe1334")
+//	r := rands.New(nil, 100, 5, 7, "adbcdefgadf;dfe1334")
 //	ctx,cancel := context.WithCancel(context.Background())
 //	go r.Serve(ctx)
 //	defer cancel()
@@ -20,43 +20,15 @@ package rands
 
 import (
 	"context"
-	"math/rand"
-	"time"
+	"math/rand/v2"
 )
-
-var (
-	chars = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+[]{};':\",./<>?")
-
-	random = rand.New(rand.NewSource(time.Now().UnixNano())) // 供全局函数使用的随机函数
-)
-
-// Alpha 返回所有的字母
-func Alpha() []byte { return chars[0:52] }
-
-// Number 返回所有的数字
-func Number() []byte { return chars[52:62] }
-
-// Punct 返回所有的标点符号
-func Punct() []byte { return chars[62:] }
-
-// AlphaNumber [Alpha] + [Number]
-func AlphaNumber() []byte { return chars[0:62] }
-
-// AlphaNumberPunct [Alpha] + [Number] + [Punct]
-func AlphaNumberPunct() []byte { return chars }
-
-// Seed 手动指定一个随机种子
-//
-// 默认情况下使用当前包初始化时的时间戳作为随机种子。
-// [Bytes] 和 [String] 依赖此项。但是 [Rands] 有专门的随机函数，不受此影响。
-func Seed(seed int64) { random = rand.New(rand.NewSource(seed)) } // TODO(go1.22) 改为 rand/v2
 
 // Bytes 产生随机字符数组
 //
 // 其长度为[min, max)，bs 所有的随机字符串从此处取。
 func Bytes(min, max int, bs []byte) []byte {
 	checkArgs(min, max, bs)
-	return bytes(random, min, max, bs)
+	return bytes(rand.IntN, rand.Uint64, min, max, bs)
 }
 
 // String 产生一个随机字符串
@@ -66,7 +38,9 @@ func String(min, max int, bs []byte) string { return string(Bytes(min, max, bs))
 
 // Rands 提供随机字符串的生成
 type Rands struct {
-	random   *rand.Rand
+	intn func(int) int
+	u64  func() uint64
+
 	min, max int
 	bytes    []byte
 	channel  chan []byte
@@ -74,30 +48,35 @@ type Rands struct {
 
 // New 声明 [Rands]
 //
-// seed 随机种子，若为 0 表示使用当前时间作为随机种子。
-// bufferSize 缓存的随机字符串数量，若为 0,表示不缓存。
-func New(seed int64, bufferSize, min, max int, bs []byte) *Rands {
+// 如果 r 为 nil，将采用默认的随机函数；
+// bufferSize 缓存的随机字符串数量，若为 0,表示不缓存；
+func New(r *rand.Rand, bufferSize, min, max int, bs []byte) *Rands {
 	checkArgs(min, max, bs)
 
 	if bufferSize <= 0 {
 		panic("bufferSize 必须大于零")
 	}
 
-	if seed == 0 {
-		seed = time.Now().UnixNano()
+	var intn func(int) int
+	var u64 func() uint64
+	if r == nil {
+		intn = rand.IntN
+		u64 = rand.Uint64
+	} else {
+		intn = r.IntN
+		u64 = rand.Uint64
 	}
 
 	return &Rands{
-		random:  rand.New(rand.NewSource(seed)),
+		intn: intn,
+		u64:  u64,
+
 		min:     min,
 		max:     max,
 		bytes:   bs,
 		channel: make(chan []byte, bufferSize),
 	}
 }
-
-// Seed 重新指定随机种子
-func (r *Rands) Seed(seed int64) { r.random.Seed(seed) }
 
 // Bytes 产生随机字符数组
 //
@@ -115,18 +94,18 @@ func (r *Rands) Serve(ctx context.Context) error {
 		case <-ctx.Done():
 			close(r.channel)
 			return ctx.Err()
-		case r.channel <- bytes(r.random, r.min, r.max, r.bytes):
+		case r.channel <- bytes(r.intn, r.u64, r.min, r.max, r.bytes):
 		}
 	}
 }
 
 // 生成介于 [min,max) 长度的随机字符数组
-func bytes(r *rand.Rand, min, max int, bs []byte) []byte {
+func bytes(intN func(int) int, u64 func() uint64, min, max int, bs []byte) []byte {
 	var l int
 	if max-1 == min {
 		l = min
 	} else {
-		l = min + r.Intn(max-min)
+		l = min + intN(max-min)
 	}
 
 	ll := uint64(len(bs))
@@ -146,7 +125,7 @@ func bytes(r *rand.Rand, min, max int, bs []byte) []byte {
 	ret := make([]byte, l)
 	for i := 0; i < l; {
 		// 在 index 不够大时，index>>bit 可能会让 index 变为 0，为 0 的 index 应该抛弃。
-		for index := r.Uint64(); index > 0 && i < l; {
+		for index := u64(); index > 0 && i < l; {
 			if idx := index & mask; idx < ll {
 				ret[i] = bs[idx]
 				i++

@@ -6,6 +6,7 @@ package rands
 
 import (
 	"context"
+	"math/rand/v2"
 	"testing"
 	"time"
 
@@ -60,12 +61,12 @@ func TestCheckArgs(t *testing.T) {
 // bytes
 func TestBytes1(t *testing.T) {
 	a := assert.New(t, false)
-	r1 := random
-	r2 := random
+	r1 := rand.IntN
+	r2 := rand.Uint64
 
-	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
-	a.NotEqual(bytes(r1, 10, 11, []byte("1234123lks;df")), bytes(r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
+	a.NotEqual(bytes(r1, r2, 10, 11, []byte("1234123lks;df")), bytes(r1, r2, 10, 11, []byte("1234123lks;df")))
 
 	println("String:", String(10, 11, AlphaNumberPunct()))
 }
@@ -86,10 +87,10 @@ func TestRandsBuffer(t *testing.T) {
 	a := assert.New(t, false)
 
 	a.PanicString(func() {
-		New(10000134, 0, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+		New(rand.New(rand.NewPCG(0, 0)), 0, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	}, "bufferSize 必须大于零")
 
-	r := New(10000134, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+	r := New(nil, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
 	a.NotNil(r)
 	ctx, cancel := context.WithCancel(context.Background())
 	go r.Serve(ctx)

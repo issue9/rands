@@ -27,6 +27,8 @@ _testmain.go
 *.swp
 .idea/
 .vscode/
+.vs/
+.zed/
 
 # 测试文件
 test.db
