@@ -74,7 +74,7 @@ func New[T Char](r *rand.Rand, bufferSize, min, max int, bs []T) *Rands[T] {
 		u64 = rand.Uint64
 	} else {
 		intn = r.IntN
-		u64 = rand.Uint64
+		u64 = r.Uint64
 	}
 
 	return &Rands[T]{
