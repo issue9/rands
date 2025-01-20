@@ -17,6 +17,14 @@ func TestChars(t *testing.T) {
 	a.Equal(s[0], 'a').
 		Equal(s[len(s)-1], 'Z')
 
+	s = LowerAlpha()
+	a.Equal(s[0], 'a').
+		Equal(s[len(s)-1], 'z')
+
+	s = UpperAlpha()
+	a.Equal(s[0], 'A').
+		Equal(s[len(s)-1], 'Z')
+
 	s = Number()
 	a.Equal(s[0], '1').
 		Equal(s[len(s)-1], '0')
