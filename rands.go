@@ -30,6 +30,11 @@ import (
 // byte 的性能为好于 rune。
 type Char interface{ ~byte | ~rune }
 
+// Append 将随机生成的字符串写入 buf
+func Append[T Char](buf []byte, min, max int, bs []T) []byte {
+	return append(buf, Bytes(min, max, bs)...)
+}
+
 // Bytes 从 bs 中随机抓取 [min,max) 个字符并返回
 //
 // NOTE: bs 的类型可以是 rune，但是返回类型始终是 []byte，所以用 len 判断返回值可能其值会很大。

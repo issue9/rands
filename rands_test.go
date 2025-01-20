@@ -45,7 +45,12 @@ func TestGen(t *testing.T) {
 	a.NotEqual(gen(r1, r2, 10, 11, []byte("1234123lks;df")), gen(r1, r2, 10, 11, []byte("1234123lks;df")))
 }
 
-// Chars
+func TestAppend(t *testing.T) {
+	a := assert.New(t, false)
+	bs := []byte{}
+	a.Equal(len(Append(bs, 8, 9, []byte("1ks;dfp123;4j;ladj;fpoqwe"))), 8)
+}
+
 func TestBytes(t *testing.T) {
 	a := assert.New(t, false)
 

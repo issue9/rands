@@ -9,6 +9,12 @@ var chars = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12345678
 // Alpha 返回所有的字母
 func Alpha() []byte { return chars[0:52] }
 
+// LowerAlpha 小写字母
+func LowerAlpha() []byte { return chars[0:26] }
+
+// UpperAlpha 大写字母
+func UpperAlpha() []byte { return chars[26:52] }
+
 // Number 返回所有的数字
 func Number() []byte { return chars[52:62] }
 
