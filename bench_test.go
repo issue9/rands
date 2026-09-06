@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2024 caixw
+// SPDX-FileCopyrightText: 2016-2026 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -25,32 +25,32 @@ func BenchmarkString(b *testing.B) {
 
 // 固定长度的随机字符串
 func BenchmarkBytes_6_7_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Bytes(6, 7, []byte("abcdefghijklmnopkrstuvwxyz"))
 	}
 }
 
 // 固定长度的随机字符串
 func BenchmarkBytes_6_7_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Bytes(6, 7, AlphaNumberPunct())
 	}
 }
 
 func BenchmarkBytes_4_6_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Bytes(4, 6, []byte("abcdefghijklmnopkrstuvwxyz"))
 	}
 }
 
 func BenchmarkBytes_4_6_All(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Bytes(4, 6, AlphaNumberPunct())
 	}
 }
 
 func BenchmarkBytes_10_32_Lower(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		Bytes(10, 32, []byte("abcdefghijklmnopkrstuvwxyz"))
 	}
 }
@@ -72,7 +72,7 @@ func BenchmarkBytes_10_32_All(b *testing.B) {
 // crypto/rand包的随机读取能力
 func BenchmarkCryptoRand_10(b *testing.B) {
 	bs := make([]byte, 10)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		rand.Read(bs)
 	}
 }
