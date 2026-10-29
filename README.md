@@ -5,9 +5,7 @@ rands
 [![Go Reference](https://pkg.go.dev/badge/github.com/issue9/rands.svg)](https://pkg.go.dev/github.com/issue9/rands/v3)
 ======
 
-rands 为一个随机字符串生成工具。
-
-*从 v3 开始只支持 go1.22 以之后的版本*
+rands 为一个随机字符串生成工具
 
 ```go
 // 拿 [8,10) 数量的 rune，每个汉字都是完整的。
@@ -29,7 +27,7 @@ str2 := r.String()
 安装
 ----
 
-```shell
+```bash
 go get github.com/issue9/rands/v3
 ```
 

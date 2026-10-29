@@ -8,10 +8,10 @@ import (
 	"context"
 	"math/rand/v2"
 	"testing"
-	"time"
+	"testing/synctest"
 	"unicode/utf8"
 
-	"github.com/issue9/assert/v5"
+	"github.com/issue9/assert/v6"
 )
 
 func TestCheckArgs(t *testing.T) {
@@ -76,25 +76,27 @@ func TestString(t *testing.T) {
 }
 
 func TestRands(t *testing.T) {
-	a := assert.New(t, false)
+	synctest.Test(t, func(t *testing.T) {
+		a := assert.New(t, false)
 
-	a.PanicString(func() {
-		New(rand.New(rand.NewPCG(0, 0)), 0, 5, 7, []byte(";adkfjpqwei12124nbnb"))
-	}, "bufferSize 必须大于零")
+		a.PanicString(func() {
+			New(rand.New(rand.NewPCG(0, 0)), 0, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+		}, "bufferSize 必须大于零")
 
-	r := New(nil, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
-	a.NotNil(r)
-	ctx, cancel := context.WithCancel(context.Background())
-	go r.Serve(ctx)
-	time.Sleep(time.Microsecond * 500) // 等待 go 运行完成
-	a.Equal(cap(r.channel), 2)
+		r := New(nil, 2, 5, 7, []byte(";adkfjpqwei12124nbnb"))
+		a.NotNil(r)
+		ctx, cancel := context.WithCancel(context.Background())
+		go r.Serve(ctx)
+		synctest.Wait()
+		a.Equal(cap(r.channel), 2)
 
-	a.NotEqual(r.String(), r.String())
-	a.NotEqual(r.String(), r.String())
-	a.NotEqual(r.Bytes(), r.Bytes())
+		a.NotEqual(r.String(), r.String())
+		a.NotEqual(r.String(), r.String())
+		a.NotEqual(r.Bytes(), r.Bytes())
 
-	cancel()
-	time.Sleep(time.Microsecond * 500) // 等待 cancel 运行完成
-	a.NotEqual(r.String(), r.String()) // 读取 channel 中剩余的数据
-	a.Equal(r.String(), r.String())    // 没有数据了，都是空值
+		cancel()
+		synctest.Wait()
+		a.NotEqual(r.String(), r.String()) // 读取 channel 中剩余的数据
+		a.Equal(r.String(), r.String())    // 没有数据了，都是空值
+	})
 }
