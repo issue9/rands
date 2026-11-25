@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2024 caixw
+// SPDX-FileCopyrightText: 2016-2026 caixw
 //
 // SPDX-License-Identifier: MIT
 
@@ -16,6 +16,8 @@
 //	str2 := r.String()
 //
 // NOTE: 仅是随机字符串，不保证唯一性。
+//
+// NOTE: 如果对随机的字符没有要求，可以直接使用 [crypto.rand] 包是个更好的选择。
 package rands
 
 import (
